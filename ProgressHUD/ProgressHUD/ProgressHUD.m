@@ -11,9 +11,16 @@
 
 #import "ProgressHUD.h"
 
+@interface ProgressHUD()
+{
+    BOOL alreadyHidded;
+    BOOL busy;
+}
+@end
+
 @implementation ProgressHUD
 
-@synthesize window, viewBackground, toolbarHUD, spinner, imageView, labelStatus, timer;
+@synthesize window, viewBackground, toolbarHUD, spinner, imageView, labelStatus, timer, delay;
 @synthesize fontStatus, colorStatus, colorSpinner, colorHUD, colorBackground, imageSuccess, imageError;
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -71,7 +78,7 @@
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	dispatch_async(dispatch_get_main_queue(), ^{
-		[[self shared] hudCreate:nil image:[self shared].imageSuccess spin:NO hide:YES interaction:YES];
+		[[self shared] hudCreate:nil image:[self shared].imageSuccess spin:NO hide:YES interaction:YES withDelay:0];
 	});
 }
 
@@ -80,7 +87,7 @@
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	dispatch_async(dispatch_get_main_queue(), ^{
-		[[self shared] hudCreate:status image:[self shared].imageSuccess spin:NO hide:YES interaction:YES];
+		[[self shared] hudCreate:status image:[self shared].imageSuccess spin:NO hide:YES interaction:YES withDelay:0];
 	});
 }
 
@@ -89,7 +96,7 @@
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	dispatch_async(dispatch_get_main_queue(), ^{
-		[[self shared] hudCreate:status image:[self shared].imageSuccess spin:NO hide:YES interaction:interaction];
+		[[self shared] hudCreate:status image:[self shared].imageSuccess spin:NO hide:YES interaction:interaction withDelay:0];
 	});
 }
 
@@ -98,7 +105,7 @@
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	dispatch_async(dispatch_get_main_queue(), ^{
-		[[self shared] hudCreate:nil image:[self shared].imageError spin:NO hide:YES interaction:YES];
+		[[self shared] hudCreate:nil image:[self shared].imageError spin:NO hide:YES interaction:YES withDelay:0];
 	});
 }
 
@@ -107,7 +114,7 @@
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	dispatch_async(dispatch_get_main_queue(), ^{
-		[[self shared] hudCreate:status image:[self shared].imageError spin:NO hide:YES interaction:YES];
+		[[self shared] hudCreate:status image:[self shared].imageError spin:NO hide:YES interaction:YES withDelay:0];
 	});
 }
 
@@ -116,7 +123,7 @@
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	dispatch_async(dispatch_get_main_queue(), ^{
-		[[self shared] hudCreate:status image:[self shared].imageError spin:NO hide:YES interaction:interaction];
+		[[self shared] hudCreate:status image:[self shared].imageError spin:NO hide:YES interaction:interaction withDelay:0];
 	});
 }
 
@@ -165,77 +172,96 @@
 
 #pragma mark -
 
-//-------------------------------------------------------------------------------------------------------------------------------------------------
 - (void)hudCreate:(NSString *)status image:(UIImage *)image spin:(BOOL)spin hide:(BOOL)hide interaction:(BOOL)interaction
+{
+    [self hudCreate:status image:image spin:spin hide:hide interaction:interaction withDelay:self.delay];
+}
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+- (void)hudCreate:(NSString *)status image:(UIImage *)image spin:(BOOL)spin hide:(BOOL)hide interaction:(BOOL)interaction withDelay:(NSTimeInterval)delay
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 {
-	if (toolbarHUD == nil)
-	{
-		toolbarHUD = [[UIToolbar alloc] initWithFrame:CGRectZero];
-		toolbarHUD.translucent = YES;
-		toolbarHUD.backgroundColor = colorHUD;
-		toolbarHUD.layer.cornerRadius = 10;
-		toolbarHUD.layer.masksToBounds = YES;
-		[self registerNotifications];
-	}
-	//---------------------------------------------------------------------------------------------------------------------------------------------
-	if (toolbarHUD.superview == nil)
-	{
-		if (interaction == NO)
-		{
-			viewBackground = [[UIView alloc] initWithFrame:window.frame];
-			viewBackground.backgroundColor = colorBackground;
-			[window addSubview:viewBackground];
-			[viewBackground addSubview:toolbarHUD];
-		}
-		else [window addSubview:toolbarHUD];
-	}
-	//---------------------------------------------------------------------------------------------------------------------------------------------
-	if (spinner == nil)
-	{
-		UIActivityIndicatorViewStyle style = UIActivityIndicatorViewStyleWhiteLarge;
-		if (@available(iOS 13, *)) { style = UIActivityIndicatorViewStyleLarge; }
-		spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:style];
-		spinner.color = colorSpinner;
-		spinner.hidesWhenStopped = YES;
-	}
-	if (spinner.superview == nil) [toolbarHUD addSubview:spinner];
-	//---------------------------------------------------------------------------------------------------------------------------------------------
-	if (imageView == nil)
-	{
-		imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 28, 28)];
-	}
-	if (imageView.superview == nil) [toolbarHUD addSubview:imageView];
-	//---------------------------------------------------------------------------------------------------------------------------------------------
-	if (labelStatus == nil)
-	{
-		labelStatus = [[UILabel alloc] initWithFrame:CGRectZero];
-		labelStatus.font = fontStatus;
-		labelStatus.textColor = colorStatus;
-		labelStatus.backgroundColor = [UIColor clearColor];
-		labelStatus.textAlignment = NSTextAlignmentCenter;
-		labelStatus.baselineAdjustment = UIBaselineAdjustmentAlignCenters;
-		labelStatus.numberOfLines = 0;
-	}
-	if (labelStatus.superview == nil) [toolbarHUD addSubview:labelStatus];
-	//---------------------------------------------------------------------------------------------------------------------------------------------
+    if (busy)
+    {
+        return;
+    }
+    busy = YES;
+    alreadyHidded = NO;
 
-	//---------------------------------------------------------------------------------------------------------------------------------------------
-	labelStatus.text = status;
-	labelStatus.hidden = (status == nil) ? YES : NO;
-	//---------------------------------------------------------------------------------------------------------------------------------------------
-	imageView.image = image;
-	imageView.hidden = (image == nil) ? YES : NO;
-	//---------------------------------------------------------------------------------------------------------------------------------------------
-	if (spin) [spinner startAnimating]; else [spinner stopAnimating];
-	//---------------------------------------------------------------------------------------------------------------------------------------------
-
-	//---------------------------------------------------------------------------------------------------------------------------------------------
-	[self hudSize];
-	[self hudPosition:nil];
-	[self hudShow];
-	//---------------------------------------------------------------------------------------------------------------------------------------------
-	if (hide) [self timedHide];
+    [NSTimer scheduledTimerWithTimeInterval:delay repeats:NO block:^(NSTimer *timer){
+        
+        if (self->alreadyHidded)
+        {
+            self->busy = NO;
+            return;
+        }
+        if (self->toolbarHUD == nil)
+        {
+            self->toolbarHUD = [[UIToolbar alloc] initWithFrame:CGRectZero];
+            self->toolbarHUD.translucent = YES;
+            self->toolbarHUD.backgroundColor = self->colorHUD;
+            self->toolbarHUD.layer.cornerRadius = 10;
+            self->toolbarHUD.layer.masksToBounds = YES;
+            [self registerNotifications];
+        }
+        //---------------------------------------------------------------------------------------------------------------------------------------------
+        if (self->toolbarHUD.superview == nil)
+        {
+            if (interaction == NO)
+            {
+                self->viewBackground = [[UIView alloc] initWithFrame:self->window.frame];
+                self->viewBackground.backgroundColor = self->colorBackground;
+                [self->window addSubview:self->viewBackground];
+                [self->viewBackground addSubview:self->toolbarHUD];
+            }
+            else [self->window addSubview:self->toolbarHUD];
+        }
+        //---------------------------------------------------------------------------------------------------------------------------------------------
+        if (self->spinner == nil)
+        {
+            UIActivityIndicatorViewStyle style = UIActivityIndicatorViewStyleWhiteLarge;
+            if (@available(iOS 13, *)) { style = UIActivityIndicatorViewStyleLarge; }
+            self->spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:style];
+            self->spinner.color = self->colorSpinner;
+            self->spinner.hidesWhenStopped = YES;
+        }
+        if (self->spinner.superview == nil) [self->toolbarHUD addSubview:self->spinner];
+        //---------------------------------------------------------------------------------------------------------------------------------------------
+        if (self->imageView == nil)
+        {
+            self->imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 28, 28)];
+        }
+        if (self->imageView.superview == nil) [self->toolbarHUD addSubview:self->imageView];
+        //---------------------------------------------------------------------------------------------------------------------------------------------
+        if (self->labelStatus == nil)
+        {
+            self->labelStatus = [[UILabel alloc] initWithFrame:CGRectZero];
+            self->labelStatus.font = self->fontStatus;
+            self->labelStatus.textColor = self->colorStatus;
+            self->labelStatus.backgroundColor = [UIColor clearColor];
+            self->labelStatus.textAlignment = NSTextAlignmentCenter;
+            self->labelStatus.baselineAdjustment = UIBaselineAdjustmentAlignCenters;
+            self->labelStatus.numberOfLines = 0;
+        }
+        if (self->labelStatus.superview == nil) [self->toolbarHUD addSubview:self->labelStatus];
+        //---------------------------------------------------------------------------------------------------------------------------------------------
+        
+        //---------------------------------------------------------------------------------------------------------------------------------------------
+        self->labelStatus.text = status;
+        self->labelStatus.hidden = (status == nil) ? YES : NO;
+        //---------------------------------------------------------------------------------------------------------------------------------------------
+        self->imageView.image = image;
+        self->imageView.hidden = (image == nil) ? YES : NO;
+        //---------------------------------------------------------------------------------------------------------------------------------------------
+        if (spin) [self->spinner startAnimating]; else [self->spinner stopAnimating];
+        //---------------------------------------------------------------------------------------------------------------------------------------------
+        
+        //---------------------------------------------------------------------------------------------------------------------------------------------
+        [self hudSize];
+        [self hudPosition:nil];
+        [self hudShow];
+        //---------------------------------------------------------------------------------------------------------------------------------------------
+        if (hide) [self timedHide];
+    }];
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -381,6 +407,7 @@
 - (void)hudHide
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 {
+    alreadyHidded = YES;
 	if (self.alpha == 1)
 	{
 		UIViewAnimationOptions options = UIViewAnimationOptionAllowUserInteraction | UIViewAnimationCurveEaseIn;
@@ -391,6 +418,7 @@
 		completion:^(BOOL finished) {
 			[self hudDestroy];
 			self.alpha = 0;
+            self->busy = NO;
 		}];
 	}
 }

@@ -58,5 +58,6 @@
 @property (strong, nonatomic) UIColor *colorBackground;
 @property (strong, nonatomic) UIImage *imageSuccess;
 @property (strong, nonatomic) UIImage *imageError;
+@property (assign, nonatomic) NSTimeInterval delay;
 
 @end
