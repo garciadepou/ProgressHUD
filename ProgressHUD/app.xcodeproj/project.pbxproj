@@ -297,7 +297,7 @@
 				INFOPLIST_FILE = app/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = v2.70.gdp.1;
+				MARKETING_VERSION = v2.70.gdp.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.garciadepou.progresshud;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -311,7 +311,7 @@
 				INFOPLIST_FILE = app/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = v2.70.gdp.1;
+				MARKETING_VERSION = v2.70.gdp.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.garciadepou.progresshud;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

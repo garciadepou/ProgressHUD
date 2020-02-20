@@ -78,7 +78,7 @@
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	dispatch_async(dispatch_get_main_queue(), ^{
-		[[self shared] hudCreate:nil image:[self shared].imageSuccess spin:NO hide:YES interaction:YES withDelay:0];
+		[[self shared] hudCreate:nil image:[self shared].imageSuccess spin:NO hide:YES interaction:YES];
 	});
 }
 
@@ -87,7 +87,7 @@
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	dispatch_async(dispatch_get_main_queue(), ^{
-		[[self shared] hudCreate:status image:[self shared].imageSuccess spin:NO hide:YES interaction:YES withDelay:0];
+		[[self shared] hudCreate:status image:[self shared].imageSuccess spin:NO hide:YES interaction:YES];
 	});
 }
 
@@ -96,7 +96,7 @@
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	dispatch_async(dispatch_get_main_queue(), ^{
-		[[self shared] hudCreate:status image:[self shared].imageSuccess spin:NO hide:YES interaction:interaction withDelay:0];
+		[[self shared] hudCreate:status image:[self shared].imageSuccess spin:NO hide:YES interaction:interaction];
 	});
 }
 
@@ -105,7 +105,7 @@
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	dispatch_async(dispatch_get_main_queue(), ^{
-		[[self shared] hudCreate:nil image:[self shared].imageError spin:NO hide:YES interaction:YES withDelay:0];
+		[[self shared] hudCreate:nil image:[self shared].imageError spin:NO hide:YES interaction:YES];
 	});
 }
 
@@ -114,7 +114,7 @@
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	dispatch_async(dispatch_get_main_queue(), ^{
-		[[self shared] hudCreate:status image:[self shared].imageError spin:NO hide:YES interaction:YES withDelay:0];
+		[[self shared] hudCreate:status image:[self shared].imageError spin:NO hide:YES interaction:YES];
 	});
 }
 
@@ -123,7 +123,7 @@
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 {
 	dispatch_async(dispatch_get_main_queue(), ^{
-		[[self shared] hudCreate:status image:[self shared].imageError spin:NO hide:YES interaction:interaction withDelay:0];
+		[[self shared] hudCreate:status image:[self shared].imageError spin:NO hide:YES interaction:interaction];
 	});
 }
 
@@ -172,23 +172,11 @@
 
 #pragma mark -
 
+//-------------------------------------------------------------------------------------------------------------------------------------------------
 - (void)hudCreate:(NSString *)status image:(UIImage *)image spin:(BOOL)spin hide:(BOOL)hide interaction:(BOOL)interaction
-{
-    [self hudCreate:status image:image spin:spin hide:hide interaction:interaction withDelay:self.delay];
-}
-//-------------------------------------------------------------------------------------------------------------------------------------------------
-- (void)hudCreate:(NSString *)status image:(UIImage *)image spin:(BOOL)spin hide:(BOOL)hide interaction:(BOOL)interaction withDelay:(NSTimeInterval)delay
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 {
-    if (busy)
-    {
-        return;
-    }
-    busy = YES;
-    alreadyHidded = NO;
-
-    [NSTimer scheduledTimerWithTimeInterval:delay repeats:NO block:^(NSTimer *timer){
-        
+ 
         if (self->alreadyHidded)
         {
             self->busy = NO;
@@ -261,7 +249,6 @@
         [self hudShow];
         //---------------------------------------------------------------------------------------------------------------------------------------------
         if (hide) [self timedHide];
-    }];
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -407,7 +394,6 @@
 - (void)hudHide
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 {
-    alreadyHidded = YES;
 	if (self.alpha == 1)
 	{
 		UIViewAnimationOptions options = UIViewAnimationOptionAllowUserInteraction | UIViewAnimationCurveEaseIn;
@@ -418,7 +404,6 @@
 		completion:^(BOOL finished) {
 			[self hudDestroy];
 			self.alpha = 0;
-            self->busy = NO;
 		}];
 	}
 }
