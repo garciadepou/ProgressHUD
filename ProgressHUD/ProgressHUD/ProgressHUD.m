@@ -393,11 +393,11 @@
 	{
 		self.alpha = 1;
 		toolbarHUD.alpha = 0;
-		toolbarHUD.transform = CGAffineTransformScale(toolbarHUD.transform, 1.4, 1.4);
+		//toolbarHUD.transform = CGAffineTransformScale(toolbarHUD.transform, 1.4, 1.4);
 
 		UIViewAnimationOptions options = UIViewAnimationOptionAllowUserInteraction | UIViewAnimationCurveEaseOut;
 		[UIView animateWithDuration:0.15 delay:0 options:options animations:^{
-			self.toolbarHUD.transform = CGAffineTransformScale(self.toolbarHUD.transform, 1/1.4, 1/1.4);
+			//self.toolbarHUD.transform = CGAffineTransformScale(self.toolbarHUD.transform, 1/1.4, 1/1.4);
 			self.toolbarHUD.alpha = 1;
 		} completion:nil];
 	}
@@ -412,7 +412,7 @@
 	{
 		UIViewAnimationOptions options = UIViewAnimationOptionAllowUserInteraction | UIViewAnimationCurveEaseIn;
 		[UIView animateWithDuration:0.15 delay:0 options:options animations:^{
-			self.toolbarHUD.transform = CGAffineTransformScale(self.toolbarHUD.transform, 0.7, 0.7);
+			//self.toolbarHUD.transform = CGAffineTransformScale(self.toolbarHUD.transform, 0.7, 0.7);
 			self.toolbarHUD.alpha = 0;
 		}
 		completion:^(BOOL finished) {
@@ -427,10 +427,21 @@
 - (void)timedHide
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 {
-	NSTimeInterval delay = labelStatus.text.length * 0.04 + 0.5;
-	timer = [NSTimer scheduledTimerWithTimeInterval:delay repeats:NO block:^(NSTimer *timer) {
-		[self hudHide];
-	}];
+    
+    NSTimeInterval delay = labelStatus.text.length * 0.04 + 0.5;
+    
+    if (@available(iOS 10, *))
+        timer = [NSTimer scheduledTimerWithTimeInterval:delay repeats:NO block:^(NSTimer *timer) {
+            [self hudHide];
+        }];
+    else
+    {
+        dispatch_time_t time = dispatch_time(DISPATCH_TIME_NOW, delay * NSEC_PER_SEC);
+        dispatch_after(time, dispatch_get_main_queue(), ^(void){
+            [self hudHide];
+            
+        });
+    }
 }
 
 @end
